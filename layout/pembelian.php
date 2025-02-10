@@ -13,7 +13,7 @@ include 'koneksi.php'; // Pastikan file koneksi sudah benar
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Pembelian</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="dashboard.css"> <!-- Link ke file CSS terpisah -->
 </head>
@@ -34,31 +34,40 @@ include 'koneksi.php'; // Pastikan file koneksi sudah benar
 
 <!-- Content -->
 <div class="content">
-    <h2>Dashboard</h2>
+    <h2>Pembelian</h2>
 
     <div class="table-container">
-        <h3>Data Barang</h3>
+        <h3>Data Pembelian</h3>
         <table class="table table-striped">
             <thead class="table-dark">
-                <tr>    
-                    <th>Nama Barang</th>
-                    <th>Harga</th>
-                    <th>Stok</th>
+                <tr>
+                    <th>ID Pembelian</th>
+                    <th>Tanggal Pembelian</th>
+                    <th>Nama Supplier</th>
+                    <th>Nama User</th>
+                    <th>Total Harga</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
-                $sql = "SELECT id_barang, nama_barang, harga, stok FROM barang";
+                // Query untuk mengambil data pembelian dan menghubungkan dengan data supplier dan user
+                $sql = "SELECT p.IDpembelian, p.tanggal_pembelian, s.nama_orang AS nama_supplier, u.username AS nama_user, p.total_harga
+                        FROM pembelian p
+                        JOIN supplier s ON p.suplier_ID = s.suplier_ID
+                        JOIN user u ON p.user_id = u.user_id";
                 $result = $conn->query($sql);
+                
                 while ($row = $result->fetch_assoc()) {
                     echo "<tr>";
-                    echo "<td>{$row['nama_barang']}</td>";
-                    echo "<td>{$row['harga']}</td>";
-                    echo "<td>{$row['stok']}</td>";
+                    echo "<td>{$row['IDpembelian']}</td>";
+                    echo "<td>{$row['tanggal_pembelian']}</td>";
+                    echo "<td>{$row['nama_supplier']}</td>";
+                    echo "<td>{$row['nama_user']}</td>";
+                    echo "<td>{$row['total_harga']}</td>";
                     echo "<td>
-                            <a href='edit_barang.php?id={$row['id_barang']}' class='btn btn-warning btn-sm'>Edit</a> 
-                            <a href='hapus_barang.php?id={$row['id_barang']}' onclick='return confirm(\"Yakin ingin menghapus?\")' class='btn btn-danger btn-sm'>Hapus</a>
+                            <a href='edit_pembelian.php?id={$row['IDpembelian']}' class='btn btn-warning btn-sm'>Edit</a> 
+                            <a href='hapus_pembelian.php?id={$row['IDpembelian']}' onclick='return confirm(\"Yakin ingin menghapus?\")' class='btn btn-danger btn-sm'>Hapus</a>
                           </td>";
                     echo "</tr>";
                 }
@@ -66,7 +75,6 @@ include 'koneksi.php'; // Pastikan file koneksi sudah benar
             </tbody>
         </table>
     </div>
-
 </div>
 
 </body>

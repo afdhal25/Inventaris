@@ -21,9 +21,9 @@ $sql = "SELECT
         JOIN barang b ON dp.id_barang = b.id_barang
         JOIN pembelian p ON dp.pembelian_id = p.IDpembelian"; // Tambahkan JOIN ke pembelian
 
+
 $result = $conn->query($sql);
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -36,7 +36,41 @@ $result = $conn->query($sql);
 
 <div class="container mt-4">
     <h2>Detail Pembelian</h2>
-    <table class="table table-striped">
+
+    <!-- Form Tambah Barang -->
+    <div class="mt-4 form-container">
+        <h3>Tambah Barang</h3>
+        <form action="tambah_barang.php" method="POST">
+            <div class="mb-3">
+                <label class="form-label">Nama Barang:</label>
+                <input type="text" name="nama_barang" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Harga:</label>
+                <input type="text" name="harga" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Stok:</label>
+                <input type="number" name="stok" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nama Orang:</label>
+                <select name="suplier_ID" class="form-control" required>
+                    <option value="">Pilih Nama</option>
+                    <?php
+                    $sql_orang = "SELECT suplier_ID, nama_orang FROM supplier";
+                    $result_orang = $conn->query($sql_orang);
+                    while ($orang = $result_orang->fetch_assoc()) {
+                        echo "<option value='{$orang['suplier_ID']}'>{$orang['nama_orang']}</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Tambah</button>
+        </form>
+    </div>
+
+    <table class="table table-striped mt-4">
         <thead>
             <tr>
                 <th>ID Pembelian</th>
@@ -51,7 +85,7 @@ $result = $conn->query($sql);
         <tbody>
             <?php 
             if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) { ?>
+                while ($row = $result->fetch_assoc($sql)) { ?>
                     <tr>
                         <td><?= $row['IDpembelian']; ?></td>
                         <td><?= $row['tanggal_pembelian']; ?></td>
