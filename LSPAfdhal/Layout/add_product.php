@@ -1,17 +1,18 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $conn = new mysqli('localhost', 'root', '', 'kasir');
-    $namaProduk = $_POST['namaProduk'];
-    $harga = $_POST['harga'];
-    $stok = $_POST['stok'];
+// Koneksi ke database
+$conn = new mysqli('localhost', 'root', '', 'kasir');
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-    $sql = "INSERT INTO produk (NamaProduk, Harga, Stok) VALUES ('$namaProduk', '$harga', '$stok')";
-    if ($conn->query($sql) === TRUE) {
-        echo "New product added successfully";
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
-    }
-    $conn->close();
+// Ambil data produk
+$products = $conn->query("SELECT * FROM produk");
+
+// Proses penghapusan produk
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $conn->query("DELETE FROM produk WHERE ProdukID = $id");
+    header("Location: manage_products.php"); // Redirect setelah hapus
 }
 ?>
 
@@ -20,20 +21,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Product</title>
+    <title>Manage Produk</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Add Product</h1>
-    <form method="post">
-        <label for="namaProduk">Nama Produk:</label>
-        <input type="text" id="namaProduk" name="namaProduk" required><br>
-        <label for="harga">Harga:</label>
-        <input type="number" id="harga" name="harga" required><br>
-        <label for="stok">Stok:</label>
-        <input type="number" id="stok" name="stok" required><br>
-        <button type="submit">Add Product</button>
-    </form>
+    <h1>Manage Produk</h1>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nama Produk</th>
+            <th>Harga</th>
+            <th>Stok</th>
+            <th>Aksi</th>
+        </tr>
+        <?php while($row = $products->fetch_assoc()): ?>
+        <tr>
+            <td><?php echo $row['ProdukID']; ?></td>
+            <td><?php echo $row['NamaProduk']; ?></td>
+            <td><?php echo $row['Harga']; ?></td>
+            <td><?php echo $row['Stok']; ?></td>
+            <td>
+                <a href="edit_product.php?id=<?php echo $row['ProdukID']; ?>">Edit</a>
+                <a href="?delete=<?php echo $row['ProdukID']; ?>" onclick="return confirm('Are you sure you want to delete?')">Delete</a>
+            </td>
+        </tr>
+        <?php endwhile; ?>
+    </table>
+
+    <a href="add_product.php">Tambah Produk</a>
     <a href="index.php">Back to Home</a>
 </body>
 </html>

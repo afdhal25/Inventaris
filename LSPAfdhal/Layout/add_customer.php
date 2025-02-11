@@ -1,16 +1,21 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn = new mysqli('localhost', 'root', '', 'kasir');
+    
+    // Ambil input pelanggan
     $namaPelanggan = $_POST['namaPelanggan'];
     $alamat = $_POST['alamat'];
     $nomorTelepon = $_POST['nomorTelepon'];
 
+    // Pastikan ID pelanggan tidak terkait dengan PenjualanID yang tidak ada
     $sql = "INSERT INTO pelanggan (NamaPelanggan, Alamat, NomorTelepon) VALUES ('$namaPelanggan', '$alamat', '$nomorTelepon')";
+
     if ($conn->query($sql) === TRUE) {
         echo "New customer added successfully";
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
+
     $conn->close();
 }
 ?>
@@ -28,10 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <form method="post">
         <label for="namaPelanggan">Nama Pelanggan:</label>
         <input type="text" id="namaPelanggan" name="namaPelanggan" required><br>
+        
         <label for="alamat">Alamat:</label>
         <input type="text" id="alamat" name="alamat" required><br>
+        
         <label for="nomorTelepon">Nomor Telepon:</label>
         <input type="text" id="nomorTelepon" name="nomorTelepon" required><br>
+        
         <button type="submit">Add Customer</button>
     </form>
     <a href="index.php">Back to Home</a>

@@ -5,41 +5,43 @@ include 'db.php'; // Pastikan koneksi sudah benar
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
+    $confirm_password = trim($_POST['confirm_password']);
 
-    // Cek apakah username ada di database
-    $stmt = $conn->prepare("SELECT UserID, password FROM user WHERE Username = ?");
+    // Validasi password dan konfirmasi password
+    if ($password !== $confirm_password) {
+        $_SESSION['error'] = "Konfirmasi password tidak cocok!";
+        header("Location: registrasi.php");
+        exit;
+    }
+
+    // Cek apakah username sudah ada di database
+    $stmt = $conn->prepare("SELECT UserID FROM user WHERE Username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
-
-    // Jika username ditemukan
+    
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($user_id, $hashed_password);
-        $stmt->fetch();
-
-        // Verifikasi password yang dimasukkan dengan yang ada di database
-        if (password_verify($password, $hashed_password)) {
-            // Password benar, buat sesi login
-            $_SESSION['user_id'] = $user_id;
-            $_SESSION['username'] = $username;
-            header("Location: dashboard.php"); // Arahkan ke dashboard
-            exit;
-        } else {
-            $_SESSION['error'] = "Password salah!";
-            header("Location: login.php");
-            exit;
-        }
-    } else {
-        $_SESSION['error'] = "Username tidak ditemukan!";
-        header("Location: login.php");
+        $_SESSION['error'] = "Username sudah digunakan!";
+        header("Location: registrasi.php");
         exit;
+    }
+    
+    // Simpan user ke database dengan password langsung
+    $stmt = $conn->prepare("INSERT INTO user (Username, Password) VALUES (?, ?)");
+    $stmt->bind_param("ss", $username, $password);
+    
+    if ($stmt->execute()) {
+        $_SESSION['success'] = "Registrasi berhasil! Silakan login.";
+        header("Location: login.php");
+    } else {
+        $_SESSION['error'] = "Terjadi kesalahan saat registrasi.";
+        header("Location: registrasi.php");
     }
 
     $stmt->close();
     $conn->close();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="id">
@@ -48,7 +50,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrasi Akun</title>
     <link rel="stylesheet" href="registrasi.css"> 
-
 </head>
 <body>
     <h2>Registrasi Akun Baru</h2>
